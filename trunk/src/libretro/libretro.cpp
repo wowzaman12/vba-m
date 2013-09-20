@@ -168,7 +168,7 @@ void retro_get_system_info(struct retro_system_info *info)
    info->need_fullpath = true;
    info->valid_extensions = "gba";
    info->library_version = "v1.0.2";
-   info->library_name = "VBA Next";
+   info->library_name = "VBA-M";
    info->block_extract = false;
 }
 
