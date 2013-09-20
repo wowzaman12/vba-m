@@ -12,8 +12,8 @@ int eepromAddress = 0;
 
 #ifdef __LIBRETRO__
 // Workaround for broken-by-design GBA save semantics
-extern u8 libsnes_save_buf[0x20000 + 0x2000];
-u8 *eepromData = libsnes_save_buf + 0x20000;
+extern u8 libretro_save_buf[0x20000 + 0x2000];
+u8 *eepromData = libretro_save_buf + 0x20000;
 #else
 u8 eepromData[0x2000];
 #endif
@@ -53,14 +53,14 @@ void eepromReset()
 }
 
 #ifdef __LIBRETRO__
-void eepromSaveGameMem(uint8_t *& data)
+void eepromSaveGame(uint8_t *& data)
 {
    utilWriteDataMem(data, eepromSaveData);
    utilWriteIntMem(data, eepromSize);
    utilWriteMem(data, eepromData, 0x2000);
 }
 
-void eepromReadGameMem(const uint8_t *& data, int version)
+void eepromReadGame(const uint8_t *& data, int version)
 {
    utilReadDataMem(data, eepromSaveData);
    if (version >= SAVE_GAME_VERSION_3) {
@@ -90,7 +90,6 @@ void eepromReadGame(gzFile gzFile, int version)
     eepromSize = 512;
   }
 }
-#endif
 
 void eepromReadGameSkip(gzFile gzFile, int version)
 {
@@ -101,6 +100,7 @@ void eepromReadGameSkip(gzFile gzFile, int version)
     utilGzSeek(gzFile, 0x2000, SEEK_CUR);
   }
 }
+#endif
 
 int eepromRead(u32 /* address */)
 {

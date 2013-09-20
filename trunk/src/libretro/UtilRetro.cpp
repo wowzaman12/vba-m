@@ -12,10 +12,6 @@
 #include "gba/RTC.h"
 #include "common/Port.h"
 
-extern "C" {
-#include "common/memgzio.h"
-}
-
 #include "gba/gbafilter.h"
 #include "gb/gbGlobals.h"
 
@@ -30,11 +26,6 @@ extern int systemBlueShift;
 
 extern uint16_t systemColorMap16[0x10000];
 extern uint32_t systemColorMap32[0x10000];
-
-static int (ZEXPORT *utilGzWriteFunc)(gzFile, const voidp, unsigned int) = NULL;
-static int (ZEXPORT *utilGzReadFunc)(gzFile, voidp, unsigned int) = NULL;
-static int (ZEXPORT *utilGzCloseFunc)(gzFile) = NULL;
-static z_off_t (ZEXPORT *utilGzSeekFunc)(gzFile, z_off_t, int) = NULL;
 
 bool utilWritePNGFile(const char *fileName, int w, int h, uint8_t *pix)
 {
@@ -181,77 +172,6 @@ uint8_t *utilLoad(const char *file, bool (*accept)(const char *), uint8_t *data,
    fread(image, 1, size, fp); // read into buffer
 	fclose(fp);
 	return image;
-}
-
-void utilWriteInt(gzFile gzFile, int i)
-{
-  utilGzWrite(gzFile, &i, sizeof(int));
-}
-
-int utilReadInt(gzFile gzFile)
-{
-  int i = 0;
-  utilGzRead(gzFile, &i, sizeof(int));
-  return i;
-}
-
-void utilReadData(gzFile gzFile, variable_desc* data)
-{
-  while(data->address) {
-    utilGzRead(gzFile, data->address, data->size);
-    data++;
-  }
-}
-
-void utilReadDataSkip(gzFile gzFile, variable_desc* data)
-{
-  while(data->address) {
-    utilGzSeek(gzFile, data->size, SEEK_CUR);
-    data++;
-  }
-}
-
-void utilWriteData(gzFile gzFile, variable_desc *data)
-{
-  while(data->address) {
-    utilGzWrite(gzFile, data->address, data->size);
-    data++;
-  }
-}
-
-gzFile utilMemGzOpen(char *memory, int available, const char *mode)
-{
-  utilGzWriteFunc = memgzwrite;
-  utilGzReadFunc = memgzread;
-  utilGzCloseFunc = memgzclose;
-  utilGzSeekFunc = memgzseek;
-
-  return memgzopen(memory, available, mode);
-}
-
-int utilGzWrite(gzFile file, const voidp buffer, unsigned int len)
-{
-  return utilGzWriteFunc(file, buffer, len);
-}
-
-int utilGzRead(gzFile file, voidp buffer, unsigned int len)
-{
-  return utilGzReadFunc(file, buffer, len);
-}
-
-int utilGzClose(gzFile file)
-{
-  return utilGzCloseFunc(file);
-}
-
-z_off_t utilGzSeek(gzFile file, z_off_t offset, int whence)
-{
-	return utilGzSeekFunc(file, offset, whence);
-}
-
-long utilGzMemTell(gzFile file)
-{
-  return memtell(file);
 }
 
 void utilGBAFindSave(const uint8_t *data, const int size)
