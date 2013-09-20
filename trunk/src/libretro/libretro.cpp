@@ -5,6 +5,7 @@
 #include "libretro.h"
 #include "SoundRetro.h"
 
+#include "../Util.h"
 #include "../System.h"
 #include "../common/Port.h"
 #include "../common/Types.h"
@@ -191,6 +192,10 @@ void retro_init(void)
    enum retro_pixel_format rgb565 = RETRO_PIXEL_FORMAT_RGB565;
    if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb565))
       fprintf(stderr, "Frontend supports RGB565 - will use that instead of XRGB1555.\n");
+#else
+   enum retro_pixel_format rgb8888 = RETRO_PIXEL_FORMAT_XRGB8888;
+   if(environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &rgb8888))
+      fprintf(stderr, "Frontend supports XRGB8888 - will use that instead of XRGB1555.\n");
 #endif
 }
 
@@ -363,6 +368,17 @@ static void gba_init(void)
    flashSize = 0x10000;
    enableRtc = false;
    mirroringEnable = false;
+#ifdef FRONTEND_SUPPORTS_RGB565
+   systemColorDepth = 16;
+#else
+   systemColorDepth = 32;
+#endif
+
+   systemRedShift = 19;
+   systemGreenShift = 11;
+   systemBlueShift = 3;
+
+   utilUpdateSystemColorMaps(false);
 
    load_image_preferences();
 
