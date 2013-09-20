@@ -20,14 +20,6 @@
 #include "../apu/Gb_Apu.h"
 #include "../gba/Globals.h"
 
-#ifdef WIN32
-#ifdef _XBOX
-#include <xtl.h>
-#else
-#include <windows.h>
-#endif
-#endif
-
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t poll_cb;
 static retro_input_state_t input_cb;
