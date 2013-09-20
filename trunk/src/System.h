@@ -48,13 +48,6 @@ struct EmulatedSystem {
 
 extern void log(const char *,...);
 
-#ifdef __CELLOS_LV2__
-extern uint32_t special_action_msg_expired;
-extern char special_action_msg[256];
-#endif
-
-extern void log(const char *,...);
-
 extern bool systemPauseOnFrame();
 extern void systemGbPrint(u8 *,int,int,int,int,int);
 extern void systemScreenCapture(int);
@@ -70,24 +63,18 @@ extern SoundDriver * systemSoundInit();
 extern void systemOnWriteDataToSoundBuffer(const u16 * finalWave, int length);
 extern void systemOnSoundShutdown();
 extern void systemScreenMessage(const char *);
-#ifdef USE_MOTION_SENSOR
 extern void systemUpdateMotionSensor();
 extern int  systemGetSensorX();
 extern int  systemGetSensorY();
-#endif
 extern bool systemCanChangeSoundQuality();
 extern void systemShowSpeed(int);
-#ifdef USE_FRAMESKIP
 extern void system10Frames(int);
-#endif
 extern void systemFrame();
 extern void systemGbBorderOn();
 
-#ifdef USE_FRAMESKIP
 extern void Sm60FPS_Init();
 extern bool Sm60FPS_CanSkipFrame();
 extern void Sm60FPS_Sleep();
-#endif
 
 extern void DbgMsg(const char *msg, ...);
 #ifdef SDL

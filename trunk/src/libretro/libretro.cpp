@@ -4,15 +4,15 @@
 
 #include "libretro.h"
 
-#include "../system.h"
-#include "../src/port.h"
-#include "../src/types.h"
-#include "../gba/GBAinline.h"
+#include "../System.h"
+#include "../common/Port.h"
+#include "../common/Types.h"
+#include "../gba/RTC.h"
 #include "../gba/GBAGfx.h"
 #include "../gba/bios.h"
 #include "../gba/Flash.h"
 #include "../gba/EEprom.h"
-//#include "../src/sound.h"
+#include "../gba/Sound.h"
 #include "../apu/Blip_Buffer.h"
 #include "../apu/Gb_Oscs.h"
 #include "../apu/Gb_Apu.h"
@@ -24,6 +24,7 @@ static retro_input_state_t input_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
 static retro_environment_t environ_cb;
 
+extern bool enableRtc;
 extern uint64_t joy;
 static bool can_dupe;
 unsigned device_type = 0;
@@ -413,6 +414,12 @@ static void update_variables(void)
    }
 }
 
+#ifdef FINAL_VERSION
+#define TICKS 250000
+#else
+#define TICKS 5000
+#endif
+
 void retro_run(void)
 {
    bool updated = false;
@@ -429,7 +436,10 @@ void retro_run(void)
    joy = J;
 
    has_frame = 0;
-   do { CPULoop(); } while (!has_frame);
+
+   do{
+      CPULoop(TICKS);
+   }while(!has_frame);
 }
 
 size_t retro_serialize_size(void)
@@ -504,4 +514,14 @@ void systemDrawScreen()
 void systemMessage(const char* str, ...)
 {
    fprintf(stderr, "%s", str);
+}
+
+int systemGetSensorX(void)
+{
+   return 0;
+}
+
+int systemGetSensorY(void)
+{
+   return 0;
 }

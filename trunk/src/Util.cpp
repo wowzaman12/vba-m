@@ -175,6 +175,8 @@ bool utilWritePNGFile(const char *fileName, int w, int h, uint8_t *pix)
   return true;
 }
 #else
+bool utilWritePNGFile(const char *fileName, int w, int h, uint8_t *pix)
+{
   return false;
 }
 #endif
@@ -468,6 +470,7 @@ uint32_t utilFindType(const char *file)
 		if(!fe)
 		#endif
 			return IMAGE_UNKNOWN;
+      #ifdef USE_FEX
 		fex_close(fe);
 		file = buffer;
       #endif
@@ -551,28 +554,7 @@ uint8_t *utilLoad(const char *file, bool (*accept)(const char *), uint8_t *data,
 		}
 	}
 
-	if(utilIsZipFile(file))
-	{
-		FILE *gd = NULL;
-		uint8_t * buf = (uint8_t *)malloc(64*1024*1024);
-		printf("ZIP file detected: %s\n", file);
-
-		// Open file 
-		gd = fopen(file, "rb");
-		if(!gd)
-			return 0;
-
-		size = UnZipBuffer(buf, gd);
-
-		memcpy(image, buf, size); // read into buffer
-		/* Close file */
-		fclose(gd);
-	}
-	else
-	{
-		printf("Non-ZIP file detected: %s\n",file);
-		fread(image, 1, size, fp); // read into buffer
-	}
+   fread(image, 1, size, fp); // read into buffer
 	fclose(fp);
 	return image;
 }
@@ -614,6 +596,7 @@ void utilWriteData(gzFile gzFile, variable_desc *data)
   }
 }
 
+#ifndef __LIBRETRO__
 gzFile utilGzOpen(const char *file, const char *mode)
 {
   utilGzWriteFunc = (int (ZEXPORT *)(void *,void * const, unsigned int))gzwrite;
@@ -623,6 +606,7 @@ gzFile utilGzOpen(const char *file, const char *mode)
 
   return gzopen(file, mode);
 }
+#endif
 
 gzFile utilMemGzOpen(char *memory, int available, const char *mode)
 {
@@ -707,7 +691,6 @@ void utilGBAFindSave(const uint8_t *data, const int size)
   cpuSaveType = saveType;
   flashSetSize(flashSize);
 }
-#endif
 
 void utilUpdateSystemColorMaps()
 {
