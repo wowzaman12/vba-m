@@ -610,22 +610,9 @@ void systemSetTitle(const char *title) {}
 void systemShowSpeed(int speed) {}
 void system10Frames(int rate) {}
 
-#ifdef __CELLOS_LV2__
-#inlude <sys/sys_time.h>
-#elif !defined(WIN32)
-#include <time.h>
-#endif
 u32 systemGetClock()
 {
-#if defined(WIN32)
-   return GetTickCount();
-#elif defined(__CELLOS_LV2__)
-   return (u32)sys_time_get_system_time();
-#else
-   struct timespec tv;
-   clock_gettime(CLOCK_MONOTONIC, &tv);
-   return (u32)tv.tv_sec * 1000000 + (u32)tv.tv_nsec / 1000;
-#endif
+   return 0;
 }
 
 int cheatsCheckKeys(u32 keys, u32 extended)
