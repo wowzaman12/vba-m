@@ -668,6 +668,7 @@ bool CPUWriteState(const char *file)
   return res;
 }
 
+
 bool CPUWriteMemState(char *memory, int available)
 {
   gzFile gzFile = utilMemGzOpen(memory, available, "w");
@@ -4139,7 +4140,11 @@ struct EmulatedSystem GBASystem = {
   // emuWriteState
   CPUWriteState,
   // emuReadMemState
+#ifdef __LIBRETRO__
+  NULL,
+#else
   CPUReadMemState,
+#endif
   // emuWriteMemState
   CPUWriteMemState,
   // emuWritePNG

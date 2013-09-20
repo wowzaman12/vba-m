@@ -24,14 +24,36 @@ static retro_input_state_t input_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
 static retro_environment_t environ_cb;
 
-extern bool enableRtc;
+bool enableRtc;
 extern uint64_t joy;
 static bool can_dupe;
 unsigned device_type = 0;
+int emulating = 0;
 
 uint8_t libretro_save_buf[0x20000 + 0x2000];	/* Workaround for broken-by-design GBA save semantics. */
 
 static unsigned libretro_save_size = sizeof(libretro_save_buf);
+
+int RGB_LOW_BITS_MASK = 0;
+
+u16 systemColorMap16[0x10000];
+u32 systemColorMap32[0x10000];
+u16 systemGbPalette[24];
+int systemRedShift = 0;
+int systemBlueShift = 0;
+int systemGreenShift = 0;
+int systemColorDepth = 32;
+int systemDebug = 0;
+int systemVerbose = 0;
+int systemFrameSkip = 0;
+int systemSaveUpdateCounter = SYSTEM_SAVE_NOT_UPDATED;
+int systemSpeed = 0;
+
+u64 startTime = 0;
+u32 renderedFrames = 0;
+
+void (*dbgOutput)(const char *s, u32 addr);
+void (*dbgSignal)(int sig, int number);
 
 void *retro_get_memory_data(unsigned id)
 {
@@ -351,6 +373,7 @@ static void gba_init(void)
 
    doMirroring(mirroringEnable);
 
+   soundInit();
    soundSetSampleRate(32000);
 
    CPUInit(0, false);
@@ -361,9 +384,14 @@ static void gba_init(void)
    uint8_t * state_buf = (uint8_t*)malloc(2000000);
    serialize_size = CPUWriteState(state_buf, 2000000);
    free(state_buf);
+
+   emulating = 1;
 }
 
-void retro_deinit(void) {}
+void retro_deinit(void)
+{
+   emulating = 0;
+}
 
 void retro_reset(void)
 {
@@ -428,12 +456,6 @@ void retro_run(void)
 
    poll_cb();
 
-   u32 J = 0;
-
-   for (unsigned i = 0; i < 10; i++)
-      J |= input_cb(0, RETRO_DEVICE_JOYPAD, 0, device_type ? binds2[i] : binds[i]) << i;
-
-   joy = J;
 
    has_frame = 0;
 
@@ -506,11 +528,6 @@ void systemOnWriteDataToSoundBuffer(const u16 *finalWave, int length)
 }
 
 void systemOnSoundShutdown() {}
-void systemSoundNonblock(bool) {}
-void systemSoundSetThrottle(u16) {}
-bool systemSoundInitDriver(long) { return true; }
-void systemSoundPause() {}
-bool systemSoundInit() { return true; }
 bool systemCanChangeSoundQuality() { return true; }
 
 void systemDrawScreen()
@@ -518,6 +535,13 @@ void systemDrawScreen()
    video_cb(pix, 240, 160, 512); //last arg is pitch
    g_video_frames++;
    has_frame = 1;
+}
+
+void systemFrame() {}
+
+void systemMessage(int, const char* str, ...)
+{
+   fprintf(stderr, "%s", str);
 }
 
 void systemMessage(const char* str, ...)
@@ -531,6 +555,58 @@ int systemGetSensorX(void)
 }
 
 int systemGetSensorY(void)
+{
+   return 0;
+}
+
+u32 systemReadJoypad(int which)
+{
+   if (which == -1)
+      which = 0;
+
+   u32 J = 0;
+
+   for (unsigned i = 0; i < 10; i++)
+      J |= input_cb(which, RETRO_DEVICE_JOYPAD, 0, device_type ? binds2[i] : binds[i]) << i;
+
+   return J;
+}
+
+bool systemReadJoypads() { return true; }
+
+void systemUpdateMotionSensor() {}
+
+bool systemPauseOnFrame() { return false; }
+void systemGbPrint(u8 *data,int pages, int feed, int palette, int contrast) {}
+void systemScreenCapture(int a) {}
+void systemScreenMessage(const char*msg)
+{
+   fprintf(stderr, "DEBUG: %s\n", msg);
+}
+
+void systemSetTitle(const char *title) {}
+void systemShowSpeed(int speed) {}
+void system10Frames(int rate) {}
+
+#ifdef __CELLOS_LV2__
+#inlude <sys/sys_time.h>
+#elif !defined(WIN32)
+#include <time.h>
+#endif
+u32 systemGetClock()
+{
+#if defined(WIN32)
+   return GetTickCount();
+#elif defined(__CELLOS_LV2__)
+   return (u32)sys_time_get_system_time();
+#else
+   struct timespec tv;
+   clock_gettime(CLOCK_MONOTONIC, &tv);
+   return (u32)tv.tv_sec * 1000000 + (u32)tv.tv_nsec / 1000;
+#endif
+}
+
+int cheatsCheckKeys(u32 keys, u32 extended)
 {
    return 0;
 }

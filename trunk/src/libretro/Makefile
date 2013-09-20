@@ -37,7 +37,7 @@ VBA_COBJ := $(VBA_CSRCS:.c=.o)
 UTIL_SOURCES := $(wildcard ../common/utils/zlib/*.c)
 UTIL_OBJS := $(UTIL_SOURCES:.c=.o)
 
-OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o UtilRetro.o
+OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o UtilRetro.o scrc32.o
 
 VBA_DEFINES := -D__LIBRETRO__ -DFINAL_VERSION -DC_CORE -DUSE_GBA_ONLY -DNO_LINK
 

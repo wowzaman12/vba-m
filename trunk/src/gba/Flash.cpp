@@ -99,7 +99,6 @@ void flashReadGame(gzFile gzFile, int version)
     utilReadData(gzFile, flashSaveData3);
   }
 }
-#endif
 
 void flashReadGameSkip(gzFile gzFile, int version)
 {
@@ -112,6 +111,8 @@ void flashReadGameSkip(gzFile gzFile, int version)
     utilReadDataSkip(gzFile, flashSaveData3);
   }
 }
+#endif
+
 
 void flashSetSize(int size)
 {
