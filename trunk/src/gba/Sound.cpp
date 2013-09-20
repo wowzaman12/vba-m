@@ -745,7 +745,7 @@ static void skip_read( gzFile in, int count )
 }
 
 #ifdef __LIBRETRO__
-void soundSaveGame( u8 *&data )
+void soundSaveGame( u8 *&out )
 #else
 void soundSaveGame( gzFile out )
 #endif
@@ -756,12 +756,13 @@ void soundSaveGame( gzFile out )
 	memset( dummy_state, 0, sizeof dummy_state );
 
 #ifdef __LIBRETRO__
-	utilWriteData( out, gba_state );
+	utilWriteDataMem( out, gba_state );
 #else
 	utilWriteData( data, gba_state );
 #endif
 }
 
+#ifndef __LIBRETRO__
 static void soundReadGameOld( gzFile in, int version )
 {
 	// Read main data
@@ -796,19 +797,28 @@ static void soundReadGameOld( gzFile in, int version )
 
 	(void) utilReadInt( in ); // ignore quality
 }
+#endif
 
 #include <stdio.h>
 
+#ifdef __LIBRETRO__
+void soundReadGame(const u8*& in, int version )
+#else
 void soundReadGame( gzFile in, int version )
+#endif
 {
 	// Prepare APU and default state
 	reset_apu();
 	gb_apu->save_state( &state.apu );
 
 	if ( version > SAVE_GAME_VERSION_9 )
+#ifdef __LIBRETRO__
+		utilReadDataMem( in, gba_state );
+#else
 		utilReadData( in, gba_state );
 	else
 		soundReadGameOld( in, version );
+#endif
 
 	gb_apu->load_state( state.apu );
 	write_SGCNT0_H( READ16LE( &ioMem [SGCNT0_H] ) & 0x770F );

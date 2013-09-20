@@ -8,8 +8,8 @@ bool rtcIsEnabled();
 void rtcReset();
 
 #ifdef __LIBRETRO__
-void rtcReadGame(u8 *&data);
-void rtcSaveGame(const u8 *&data);
+void rtcReadGame(const u8 *&data);
+void rtcSaveGame(u8 *&data);
 #else
 void rtcReadGame(gzFile gzFile);
 void rtcSaveGame(gzFile gzFile);

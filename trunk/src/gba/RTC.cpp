@@ -8,7 +8,13 @@
 #include <time.h>
 #include <memory.h>
 
-enum RTCSTATE { IDLE, COMMAND, DATA, READDATA };
+enum RTCSTATE
+{
+   IDLE = 0,
+   COMMAND,
+   DATA,
+   READDATA
+};
 
 typedef struct {
   u8 byte0;

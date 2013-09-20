@@ -496,13 +496,22 @@ unsigned retro_get_region(void)
    return RETRO_REGION_NTSC;
 }
 
-void systemOnWriteDataToSoundBuffer(int16_t *finalWave, int length)
+void systemOnWriteDataToSoundBuffer(const u16 *finalWave, int length)
 {
+   const int16_t* wave = (const int16_t*)finalWave;
    int frames = length >> 1;
-   audio_batch_cb(finalWave, frames);
+   audio_batch_cb(wave, frames);
 
    g_audio_frames += frames;
 }
+
+void systemOnSoundShutdown() {}
+void systemSoundNonblock(bool) {}
+void systemSoundSetThrottle(u16) {}
+bool systemSoundInitDriver(long) { return true; }
+void systemSoundPause() {}
+bool systemSoundInit() { return true; }
+bool systemCanChangeSoundQuality() { return true; }
 
 void systemDrawScreen()
 {

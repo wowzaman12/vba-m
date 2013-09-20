@@ -14,17 +14,13 @@ typedef struct {
 	void *address;
 	int size;
 } variable_desc;
-#ifdef USE_IMAGE
 bool utilWritePNGFile(const char *, int, int, u8 *);
 bool utilWriteBMPFile(const char *, int, int, u8 *);
-#endif
 void utilApplyIPS(const char *ips, uint8_t **rom, int *size);
 bool utilIsGBAImage(const char *);
 bool utilIsGBImage(const char *);
 bool utilIsGzipFile(const char *);
-#if 0
 bool utilIsZipFile(const char *);
-#endif
 void utilStripDoubleExtension(const char *, char *);
 uint32_t utilFindType(const char *);
 uint8_t *utilLoad(const char *, bool (*)(const char*), uint8_t *, int &);

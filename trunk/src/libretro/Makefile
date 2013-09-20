@@ -28,7 +28,7 @@ endif
 
 VBA_DIR := ../
 
-VBA_SRC_DIRS := $(VBA_DIR) $(VBA_DIR)/gba $(VBA_DIR)/apu 
+VBA_SRC_DIRS := $(VBA_DIR)/gba $(VBA_DIR)/apu 
 
 VBA_CXXSRCS := $(foreach dir,$(VBA_SRC_DIRS),$(wildcard $(dir)/*.cpp))
 VBA_CXXOBJ := $(VBA_CXXSRCS:.cpp=.o) ../common/Patch.o

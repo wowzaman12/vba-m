@@ -1,4 +1,3 @@
-#ifndef __LIBRETRO__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,9 +18,7 @@ extern "C" {
 #include "gba/RTC.h"
 #include "common/Port.h"
 
-#ifdef USE_FEX
 #include "fex/fex.h"
-#endif
 
 extern "C" {
 #include "common/memgzio.h"
@@ -47,7 +44,6 @@ static int (ZEXPORT *utilGzReadFunc)(gzFile, voidp, unsigned int) = NULL;
 static int (ZEXPORT *utilGzCloseFunc)(gzFile) = NULL;
 static z_off_t (ZEXPORT *utilGzSeekFunc)(gzFile, z_off_t, int) = NULL;
 
-#ifdef USE_IMAGE
 bool utilWritePNGFile(const char *fileName, int w, int h, uint8_t *pix)
 {
   uint8_t writeBuffer[512 * 3];
@@ -175,12 +171,7 @@ bool utilWritePNGFile(const char *fileName, int w, int h, uint8_t *pix)
 
   return true;
 }
-#else
-bool utilWritePNGFile(const char *fileName, int w, int h, uint8_t *pix)
-{
-  return false;
-}
-#endif
+
 void utilPutDword(u8 *p, u32 value)
 {
   *p++ = value & 255;
@@ -195,7 +186,6 @@ void utilPutWord(uint8_t *p, uint16_t value)
   *p = (value >> 8) & 255;
 }
 
-#ifdef USE_IMAGE
 bool utilWriteBMPFile(const char *fileName, int w, int h, uint8_t *pix)
 {
   uint8_t writeBuffer[512 * 3];
@@ -320,7 +310,6 @@ bool utilWriteBMPFile(const char *fileName, int w, int h, uint8_t *pix)
 
   return true;
 }
-#endif
 
 extern bool cpuIsMultiBoot;
 
@@ -413,7 +402,6 @@ void utilStripDoubleExtension(const char *file, char *buffer)
 
 // Opens and scans archive using accept(). Returns fex_t if found.
 // If error or not found, displays message and returns NULL.
-#ifdef USE_FEX
 static fex_t* scan_arc(const char *file, bool (*accept)(const char *),
 		char (&buffer) [2048] )
 {
@@ -454,7 +442,6 @@ static fex_t* scan_arc(const char *file, bool (*accept)(const char *),
 	}
 	return fe;
 }
-#endif
 
 static bool utilIsImage(const char *file)
 {
@@ -466,15 +453,11 @@ uint32_t utilFindType(const char *file)
 	char buffer [2048];
 	if ( !utilIsImage( file ) ) // TODO: utilIsArchive() instead?
 	{
-		#ifdef USE_FEX
 		fex_t* fe = scan_arc(file,utilIsImage,buffer);
 		if(!fe)
-		#endif
 			return IMAGE_UNKNOWN;
-      #ifdef USE_FEX
 		fex_close(fe);
 		file = buffer;
-      #endif
 	}
 	return utilIsGBAImage(file) ? IMAGE_GBA : IMAGE_GB;
 }
@@ -488,7 +471,6 @@ static int utilGetSize(int size)
 }
 
 uint8_t *utilLoad(const char *file, bool (*accept)(const char *), uint8_t *data, int &size)
-#ifdef USE_FEX
 {
 	// find image file
 	char buffer [2048];
@@ -532,34 +514,6 @@ uint8_t *utilLoad(const char *file, bool (*accept)(const char *), uint8_t *data,
 
 	return image;
 }
-#else
-{
-	FILE *fp = NULL;
-	char *buf = NULL;
-
-	fp = fopen(file,"rb");
-	fseek(fp, 0, SEEK_END); //go to end
-	size = ftell(fp); // get position at end (length)
-	rewind(fp);
-
-	uint8_t *image = data;
-	if(image == NULL)
-	{
-		//allocate buffer memory if none was passed to the function
-		image = (uint8_t *)__builtin_malloc(utilGetSize(size));
-		if(image == NULL)
-		{
-			systemMessage(MSG_OUT_OF_MEMORY, N_("Failed to allocate memory for %s"),
-					"data");
-			return NULL;
-		}
-	}
-
-   fread(image, 1, size, fp); // read into buffer
-	fclose(fp);
-	return image;
-}
-#endif
 
 void utilWriteInt(gzFile gzFile, int i)
 {
@@ -597,7 +551,6 @@ void utilWriteData(gzFile gzFile, variable_desc *data)
   }
 }
 
-#ifndef __LIBRETRO__
 gzFile utilGzOpen(const char *file, const char *mode)
 {
   utilGzWriteFunc = (int (ZEXPORT *)(void *,void * const, unsigned int))gzwrite;
@@ -607,7 +560,6 @@ gzFile utilGzOpen(const char *file, const char *mode)
 
   return gzopen(file, mode);
 }
-#endif
 
 gzFile utilMemGzOpen(char *memory, int available, const char *mode)
 {
@@ -695,7 +647,6 @@ void utilGBAFindSave(const uint8_t *data, const int size)
 
 void utilUpdateSystemColorMaps()
 {
- #if 0
   switch(systemColorDepth) {
   case 16:
     {
@@ -719,12 +670,6 @@ void utilUpdateSystemColorMaps()
     }
     break;
   }
-#endif
-      for(int i = 0; i < 0x10000; i++) {
-        systemColorMap32[i] = ((i & 0x1f) << systemRedShift) |
-          (((i & 0x3e0) >> 5) << systemGreenShift) |
-          (((i & 0x7c00) >> 10) << systemBlueShift);
-      }
 }
 
 // Check for existence of file.
@@ -738,51 +683,3 @@ bool utilFileExists( const char *filename )
 		return true;
 	}
 }
-
-// Not endian safe, but VBA itself doesn't seem to care, so hey <_<
-#ifdef __LIBRETRO__
-void utilWriteIntMem(uint8_t *& data, int val)
-{
-   memcpy(data, &val, sizeof(int));
-   data += sizeof(int);
-}
-
-void utilWriteMem(uint8_t *& data, const void *in_data, unsigned size)
-{
-   memcpy(data, in_data, size);
-   data += size;
-}
-
-void utilWriteDataMem(uint8_t *& data, variable_desc *desc)
-{
-   while (desc->address) 
-   {
-      utilWriteMem(data, desc->address, desc->size);
-      desc++;
-   }
-}
-
-int utilReadIntMem(const uint8_t *& data)
-{
-   int res;
-   memcpy(&res, data, sizeof(int));
-   data += sizeof(int);
-   return res;
-}
-
-void utilReadMem(void *buf, const uint8_t *& data, unsigned size)
-{
-   memcpy(buf, data, size);
-   data += size;
-}
-
-void utilReadDataMem(const uint8_t *& data, variable_desc *desc)
-{
-   while (desc->address)
-   {
-      utilReadMem(desc->address, data, desc->size);
-      desc++;
-   }
-}
-#endif
-#endif

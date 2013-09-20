@@ -303,7 +303,7 @@ void utilGBAFindSave(const uint8_t *data, const int size)
   flashSetSize(flashSize);
 }
 
-void utilUpdateSystemColorMaps()
+void utilUpdateSystemColorMaps(bool lcd)
 {
   switch(systemColorDepth) {
   case 16:

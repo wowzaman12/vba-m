@@ -578,6 +578,8 @@ void CPUUpdateRenderBuffers(bool force)
 }
 
 #ifdef __LIBRETRO__
+#include <cstddef>
+
 unsigned int CPUWriteState(u8* data, unsigned size)
 {
    uint8_t *orig = data;
@@ -606,6 +608,11 @@ unsigned int CPUWriteState(u8* data, unsigned size)
    rtcSaveGame(data);
 
    return (ptrdiff_t)data - (ptrdiff_t)orig;
+}
+
+bool CPUWriteMemState(char *memory, int available)
+{
+   return false;
 }
 #else
 static bool CPUWriteState(gzFile gzFile)
@@ -644,7 +651,6 @@ static bool CPUWriteState(gzFile gzFile)
 
   return true;
 }
-#endif
 
 bool CPUWriteState(const char *file)
 {
@@ -681,6 +687,8 @@ bool CPUWriteMemState(char *memory, int available)
 
   return res;
 }
+#endif
+
 
 #ifdef __LIBRETRO__
 bool CPUReadState(const u8* data, unsigned size)
@@ -721,10 +729,10 @@ bool CPUReadState(const u8* data, unsigned size)
    utilReadMem(pix, data, 4*241*162);
    utilReadMem(ioMem, data, 0x400);
 
-   eepromReadGameMem(data, version);
-   flashReadGameMem(data, version);
-   soundReadGameMem(data, version);
-   rtcReadGameMem(data);
+   eepromReadGame(data, version);
+   flashReadGame(data, version);
+   soundReadGame(data, version);
+   rtcReadGame(data);
 
    //// Copypasta stuff ...
    // set pointers!
@@ -733,10 +741,10 @@ bool CPUReadState(const u8* data, unsigned size)
    CPUUpdateRender();
 
    // CPU Update Render Buffers set to true
-   CLEAR_ARRAY(line[0]);
-   CLEAR_ARRAY(line[1]);
-   CLEAR_ARRAY(line[2]);
-   CLEAR_ARRAY(line[3]);
+   CLEAR_ARRAY(line0);
+   CLEAR_ARRAY(line1);
+   CLEAR_ARRAY(line2);
+   CLEAR_ARRAY(line3);
    // End of CPU Update Render Buffers set to true
 
    CPUUpdateWindow0();
@@ -952,7 +960,6 @@ static bool CPUReadState(gzFile gzFile)
 
   return true;
 }
-#endif
 
 bool CPUReadMemState(char *memory, int available)
 {
@@ -965,7 +972,6 @@ bool CPUReadMemState(char *memory, int available)
   return res;
 }
 
-#ifndef __LIBRETRO__
 bool CPUReadState(const char * file)
 {
   gzFile gzFile = utilGzOpen(file, "rb");
