@@ -1,3 +1,4 @@
+#ifndef __LIBRETRO__
 #include <stdio.h>
 #include <memory.h>
 #include "GBA.h"
@@ -71,10 +72,22 @@ void flashReset()
   flashBank = 0;
 }
 
+#ifdef __LIBRETRO__
+void flashSaveGame(uint8_t *& data)
+{
+   utilWriteData(data, flashSaveData3);
+}
+
+void flashReadGame(const uint8_t *& data, int)
+{
+   utilReadData(data, flashSaveData3);
+}
+#else
 void flashSaveGame(gzFile gzFile)
 {
   utilWriteData(gzFile, flashSaveData3);
 }
+
 
 void flashReadGame(gzFile gzFile, int version)
 {
@@ -88,6 +101,7 @@ void flashReadGame(gzFile gzFile, int version)
     utilReadData(gzFile, flashSaveData3);
   }
 }
+#endif
 
 void flashReadGameSkip(gzFile gzFile, int version)
 {
@@ -265,3 +279,4 @@ void flashWrite(u32 address, u8 byte)
     break;
   }
 }
+#endif

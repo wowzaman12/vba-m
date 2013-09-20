@@ -74,7 +74,11 @@ extern int SOUND_CLOCK_TICKS;   // Number of 16.8 MHz clocks between calls to so
 extern int soundTicks;          // Number of 16.8 MHz clocks until soundTick() will be called
 
 // Saves/loads emulator state
+#ifdef __LIBRETRO__
+void soundSaveGame( u8 *& );
+#else
 void soundSaveGame( gzFile );
+#endif
 void soundReadGame( gzFile, int version );
 
 class Multi_Buffer;

@@ -1,3 +1,4 @@
+#ifndef __LIBRETRO__
 #include <memory.h>
 #include "GBA.h"
 #include "EEprom.h"
@@ -10,13 +11,7 @@ int eepromByte = 0;
 int eepromBits = 0;
 int eepromAddress = 0;
 
-#ifdef __LIBRETRO__
-// Workaround for broken-by-design GBA save semantics.
-extern u8 libretro_save_buf[0x20000 + 0x2000];
-u8 *eepromData = libretro_save_buf + 0x20000;
-#else
 u8 eepromData[0x2000];
-#endif
 
 u8 eepromBuffer[16];
 bool eepromInUse = false;
@@ -35,11 +30,7 @@ variable_desc eepromSaveData[] = {
 
 void eepromInit()
 {
-#ifdef __LIBRETRO__
-	memset(eepromData, 255, 0x2000);
-#else
 	memset(eepromData, 255, sizeof(eepromData));
-#endif
 }
 
 void eepromReset()
@@ -52,26 +43,6 @@ void eepromReset()
   eepromSize = 512;
 }
 
-#ifdef __LIBRETRO__
-void eepromSaveGameMem(u8* &data)
-{
-  utilWriteDataMem(data, eepromSaveData);
-  utilWriteIntMem(data, eepromSize);
-  utilWriteMem(data, eepromData, 0x2000);
-}
-
-void eepromReadGame(const u8 *&data, int version)
-{
-  utilReadDataMem(data, eepromSaveData);
-  if(version >= SAVE_GAME_VERSION_3) {
-    eepromSize = utilReadIntMem(data);
-    utilReadMem(eepromData, data, 0x2000);
-  } else {
-    // prior to 0.7.1, only 4K EEPROM was supported
-    eepromSize = 512;
-  }
-}
-#else
 void eepromSaveGame(gzFile gzFile)
 {
   utilWriteData(gzFile, eepromSaveData);
@@ -90,7 +61,6 @@ void eepromReadGame(gzFile gzFile, int version)
     eepromSize = 512;
   }
 }
-#endif
 
 
 void eepromReadGameSkip(gzFile gzFile, int version)
@@ -219,3 +189,4 @@ void eepromWrite(u32 /* address */, u8 value)
     break;
   }
 }
+#endif

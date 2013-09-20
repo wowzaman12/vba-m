@@ -28,16 +28,16 @@ endif
 
 VBA_DIR := ../
 
-VBA_SRC_DIRS := $(VBA_DIR) $(VBA_DIR)/gba $(VBA_DIR)/apu $(VBA_DIR)/common
+VBA_SRC_DIRS := $(VBA_DIR) $(VBA_DIR)/gba $(VBA_DIR)/apu 
 
 VBA_CXXSRCS := $(foreach dir,$(VBA_SRC_DIRS),$(wildcard $(dir)/*.cpp))
-VBA_CXXOBJ := $(VBA_CXXSRCS:.cpp=.o)
+VBA_CXXOBJ := $(VBA_CXXSRCS:.cpp=.o) ../common/Patch.o
 VBA_CSRCS := $(foreach dir,$(VBA_SRC_DIRS),$(wildcard $(dir)/*.c))
 VBA_COBJ := $(VBA_CSRCS:.c=.o)
 UTIL_SOURCES := $(wildcard ../common/utils/zlib/*.c)
 UTIL_OBJS := $(UTIL_SOURCES:.c=.o)
 
-OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o
+OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o UtilRetro.o
 
 VBA_DEFINES := -D__LIBRETRO__ -DFINAL_VERSION -DC_CORE -DUSE_GBA_ONLY -DNO_LINK
 

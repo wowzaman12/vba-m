@@ -600,10 +600,10 @@ unsigned int CPUWriteState(u8* data, unsigned size)
    utilWriteMem(data, pix, 4 * 241 * 162);
    utilWriteMem(data, ioMem, 0x400);
 
-   eepromSaveGameMem(data);
-   flashSaveGameMem(data);
-   soundSaveGameMem(data);
-   rtcSaveGameMem(data);
+   eepromSaveGame(data);
+   flashSaveGame(data);
+   soundSaveGame(data);
+   rtcSaveGame(data);
 
    return (ptrdiff_t)data - (ptrdiff_t)orig;
 }

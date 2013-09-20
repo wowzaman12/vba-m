@@ -1,3 +1,4 @@
+#ifndef __LIBRETRO__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -783,4 +784,5 @@ void utilReadDataMem(const uint8_t *& data, variable_desc *desc)
       desc++;
    }
 }
+#endif
 #endif

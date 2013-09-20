@@ -744,14 +744,22 @@ static void skip_read( gzFile in, int count )
 	}
 }
 
+#ifdef __LIBRETRO__
+void soundSaveGame( u8 *&data )
+#else
 void soundSaveGame( gzFile out )
+#endif
 {
 	gb_apu->save_state( &state.apu );
 
 	// Be sure areas for expansion get written as zero
 	memset( dummy_state, 0, sizeof dummy_state );
 
+#ifdef __LIBRETRO__
 	utilWriteData( out, gba_state );
+#else
+	utilWriteData( data, gba_state );
+#endif
 }
 
 static void soundReadGameOld( gzFile in, int version )
