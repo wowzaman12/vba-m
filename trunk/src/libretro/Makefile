@@ -12,15 +12,16 @@ endif
 endif
 
 ifeq ($(platform), unix)
-   TARGET := libretro.so
+   TARGET := libvbam-retro.so
    fpic := -fPIC
    SHARED := -shared
 else ifeq ($(platform), osx)
-   TARGET := libretro.dylib
+   TARGET := libvbam-retro.dylib
    fpic := -fPIC
    SHARED := -dynamiclib
 else
-   TARGET := retro.dll
+   TARGET := vbam-retro.dll
+   LDFLAGS += -Wl,-no-undefined -Wl,--version-script=link.T
    CC = gcc
    CXX = g++
    SHARED := -shared -static-libgcc -static-libstdc++
@@ -43,7 +44,7 @@ VBA_DEFINES := -D__LIBRETRO__ -DFINAL_VERSION -DC_CORE -DUSE_GBA_ONLY -DNO_LINK
 
 CFLAGS += -O3 -std=gnu99 $(fpic) $(VBA_DEFINES) -I../common/utils/zlib
 CXXFLAGS += -O3 $(fpic) $(VBA_DEFINES) -I../common/utils/zlib
-LDFLAGS += -Wl,-no-undefined -Wl,--version-script=link.T
+
 
 INCDIRS := -I$(VBA_DIR)
 LIBS :=
