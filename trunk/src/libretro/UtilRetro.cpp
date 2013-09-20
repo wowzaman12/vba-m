@@ -160,7 +160,7 @@ uint8_t *utilLoad(const char *file, bool (*accept)(const char *), uint8_t *data,
 	if(image == NULL)
 	{
 		//allocate buffer memory if none was passed to the function
-		image = (uint8_t *)__builtin_malloc(utilGetSize(size));
+		image = (uint8_t *)malloc(utilGetSize(size));
 		if(image == NULL)
 		{
 			systemMessage(MSG_OUT_OF_MEMORY, N_("Failed to allocate memory for %s"),
