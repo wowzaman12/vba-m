@@ -544,7 +544,9 @@ bool systemCanChangeSoundQuality() { return true; }
 
 void systemDrawScreen()
 {
-   video_cb(pix, 240, 160, 512); //last arg is pitch
+   unsigned pitch_w = 240 * 4;
+   unsigned pitch = ((unsigned)((pitch_w / 4.0) + 1)) * 4;
+   video_cb(pix, 240, 160, pitch); //last arg is pitch
    g_video_frames++;
    has_frame = 1;
 }
