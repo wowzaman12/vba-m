@@ -348,6 +348,11 @@ static void end_frame( blip_time_t time )
 
 void flush_samples(Multi_Buffer * buffer)
 {
+#ifdef __LIBRETRO__
+   int numSamples = buffer->read_samples( (blip_sample_t*) soundFinalWave, buffer->samples_avail() );
+   soundDriver->write(soundFinalWave, numSamples);
+   systemOnWriteDataToSoundBuffer(soundFinalWave, numSamples);
+#else
 	// We want to write the data frame by frame to support legacy audio drivers
 	// that don't use the length parameter of the write method.
 	// TODO: Update the Win32 audio drivers (DS, OAL, XA2), and flush all the
@@ -370,6 +375,7 @@ void flush_samples(Multi_Buffer * buffer)
 		soundDriver->write(soundFinalWave, soundBufferLen);
 		systemOnWriteDataToSoundBuffer(soundFinalWave, soundBufferLen);
 	}
+#endif
 }
 
 static void apply_filtering()
