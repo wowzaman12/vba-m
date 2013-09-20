@@ -1,3 +1,4 @@
+#ifndef __LIBRETRO__
 // This file was written by denopqrihg
 // with major changes by tjm
 #include <string.h>
@@ -1518,4 +1519,5 @@ void lclient::Send(){
 	lanlink.tcpsocket.Send(outbuffer, 4);
 	return;
 }
+#endif
 #endif

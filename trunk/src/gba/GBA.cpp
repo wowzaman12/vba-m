@@ -2964,8 +2964,7 @@ void CPUUpdateRegister(u32 address, u16 value)
     timerOnOffDelay|=8;
     cpuNextEvent = cpuTotalTicks;
     break;
-
-
+#ifndef NO_LINK
   case COMM_SIOCNT:
 	  StartLink(value);
 	  break;
@@ -2973,6 +2972,7 @@ void CPUUpdateRegister(u32 address, u16 value)
   case COMM_SIODATA8:
 	  UPDATE_REG(COMM_SIODATA8, value);
 	  break;
+#endif
 
   case 0x130:
 	  P1 |= (value & 0x3FF);
@@ -2983,6 +2983,7 @@ void CPUUpdateRegister(u32 address, u16 value)
 	  UPDATE_REG(0x132, value & 0xC3FF);
 	  break;
 
+#ifndef NO_LINK
   case COMM_RCNT:
 	  StartGPLink(value);
 	  break;
@@ -3018,6 +3019,7 @@ void CPUUpdateRegister(u32 address, u16 value)
   case COMM_JOYSTAT:
 	  UPDATE_REG(COMM_JOYSTAT, (READ16LE(&ioMem[COMM_JOYSTAT]) & 0xf) | (value & 0xf0));
 	  break;
+#endif
 
   case 0x200:
     IE = value & 0x3FFF;
@@ -3585,8 +3587,10 @@ void CPULoop(int ticks)
   cpuTotalTicks = 0;
 
   // shuffle2: what's the purpose?
+#ifndef NO_LINK
   if(gba_link_enabled)
     cpuNextEvent = 1;
+#endif
 
   cpuBreakLoop = false;
   cpuNextEvent = CPUUpdateTicks();
@@ -4037,8 +4041,10 @@ void CPULoop(int ticks)
 	  if (gba_joybus_enabled)
 		  JoyBusUpdate(clockTicks);
 
+#ifndef NO_LINK
 	  if (gba_link_enabled)
 		  LinkUpdate(clockTicks);
+#endif
 
       cpuNextEvent = CPUUpdateTicks();
 
@@ -4053,9 +4059,11 @@ void CPULoop(int ticks)
         goto updateLoop;
       }
 
+#ifndef NO_LINK
 	  // shuffle2: what's the purpose?
 	  if(gba_link_enabled)
   	       cpuNextEvent = 1;
+#endif
 
       if(IF && (IME & 1) && armIrqEnable) {
         int res = IF & IE;

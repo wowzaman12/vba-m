@@ -7,7 +7,10 @@
 #include "Sound.h"
 #include "agbprint.h"
 #include "GBAcpu.h"
+
+#ifndef NO_LINK
 #include "GBALink.h"
+#endif
 
 extern const u32 objTilesAddress[3];
 
@@ -80,8 +83,10 @@ static inline u32 CPUReadMemory(u32 address)
 	  if((address < 0x4000400) && ioReadable[address & 0x3fc]) {
 		  if(ioReadable[(address & 0x3fc) + 2]) {
 			  value = READ32LE(((u32 *)&ioMem[address & 0x3fC]));
+#ifndef NO_LINK
 			  if ((address & 0x3fc) == COMM_JOY_RECV_L)
 				  UPDATE_REG(COMM_JOYSTAT, READ16LE(&ioMem[COMM_JOYSTAT]) & ~JOYSTAT_RECV);
+#endif
 		  } else {
 			  value = READ16LE(((u16 *)&ioMem[address & 0x3fc]));
 		  }
