@@ -41,6 +41,7 @@ UTIL_OBJS := $(UTIL_SOURCES:.c=.o)
 OBJS := $(VBA_COBJ) $(VBA_CXXOBJ) $(UTIL_OBJS) libretro.o UtilRetro.o SoundRetro.o scrc32.o
 
 VBA_DEFINES := -D__LIBRETRO__ -DFINAL_VERSION -DC_CORE -DUSE_GBA_ONLY -DNO_LINK
+VBA_DEFINES += -DFRONTEND_SUPPORTS_RGB565
 
 CFLAGS += -O3 -std=gnu99 $(fpic) $(VBA_DEFINES) -I../common/utils/zlib
 CXXFLAGS += -O3 $(fpic) $(VBA_DEFINES) -I../common/utils/zlib

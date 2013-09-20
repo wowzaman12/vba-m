@@ -370,13 +370,16 @@ static void gba_init(void)
    mirroringEnable = false;
 #ifdef FRONTEND_SUPPORTS_RGB565
    systemColorDepth = 16;
+   systemRedShift = 11;
+   systemGreenShift = 6;
+   systemBlueShift = 0;
 #else
    systemColorDepth = 32;
-#endif
-
    systemRedShift = 19;
    systemGreenShift = 11;
    systemBlueShift = 3;
+#endif
+
 
    utilUpdateSystemColorMaps(false);
 
@@ -542,11 +545,15 @@ void systemOnWriteDataToSoundBuffer(const u16 *finalWave, int length)
 void systemOnSoundShutdown() {}
 bool systemCanChangeSoundQuality() { return true; }
 
+#ifdef FRONTEND_SUPPORTS_RGB565
+#define GBA_PITCH 484
+#else
+#define GBA_PITCH 964
+#endif
+
 void systemDrawScreen()
 {
-   unsigned pitch_w = 240 * 4;
-   unsigned pitch = ((unsigned)((pitch_w / 4.0) + 1)) * 4;
-   video_cb(pix, 240, 160, pitch); //last arg is pitch
+   video_cb(pix, 240, 160, GBA_PITCH);
    g_video_frames++;
    has_frame = 1;
 }
