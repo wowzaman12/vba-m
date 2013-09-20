@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "libretro.h"
+#include "SoundRetro.h"
 
 #include "../System.h"
 #include "../common/Port.h"
@@ -21,7 +22,7 @@
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t poll_cb;
 static retro_input_state_t input_cb;
-static retro_audio_sample_batch_t audio_batch_cb;
+retro_audio_sample_batch_t audio_batch_cb;
 static retro_environment_t environ_cb;
 
 bool enableRtc;
@@ -502,7 +503,7 @@ bool retro_load_game_special(
 )
 { return false; }
 
-static unsigned g_audio_frames;
+extern unsigned g_audio_frames;
 static unsigned g_video_frames;
 
 void retro_unload_game(void)
@@ -520,11 +521,6 @@ unsigned retro_get_region(void)
 
 void systemOnWriteDataToSoundBuffer(const u16 *finalWave, int length)
 {
-   const int16_t* wave = (const int16_t*)finalWave;
-   int frames = length >> 1;
-   audio_batch_cb(wave, frames);
-
-   g_audio_frames += frames;
 }
 
 void systemOnSoundShutdown() {}
@@ -609,4 +605,11 @@ u32 systemGetClock()
 int cheatsCheckKeys(u32 keys, u32 extended)
 {
    return 0;
+}
+
+SoundDriver *systemSoundInit()
+{
+   soundShutdown();
+
+   return new SoundRetro();
 }
