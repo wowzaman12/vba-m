@@ -166,7 +166,7 @@ void retro_set_environment(retro_environment_t cb)
 void retro_get_system_info(struct retro_system_info *info)
 {
    info->need_fullpath = true;
-   info->valid_extensions = "gba";
+   info->valid_extensions = "gba|agb|bin|elf|mb";
    info->library_version = "v1.0.2";
    info->library_name = "VBA-M";
    info->block_extract = false;
